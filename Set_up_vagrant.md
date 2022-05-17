@@ -2,72 +2,73 @@
 
 1. Create a file called `vagrantfile` with the below configuration:
 
-        # -*- mode: ruby -*-
-        # vi: set ft=ruby :
+```vagrant
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
-        # All Vagrant configuration is done below. The "2" in Vagrant.configure
-        # configures the configuration version (we support older styles for
-        # backwards compatibility). Please don't change it unless you know what
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
 
-        # MULTI SERVER/VMs environment 
-        #
-        Vagrant.configure("2") do |config|
+# MULTI SERVER/VMs environment 
+#
+Vagrant.configure("2") do |config|
 
-            # creating first VM called web  
-            config.vm.define "web" do |web|
-                
-                web.vm.box = "bento/ubuntu-18.04"
-            # downloading ubuntu 18.04 image
+    # creating first VM called web  
+      config.vm.define "web" do |web|
+        
+        web.vm.box = "bento/ubuntu-18.04"
+       # downloading ubuntu 18.04 image
+    
+        web.vm.hostname = 'web'
+        # assigning host name to the VM
+        
+        web.vm.network :private_network, ip: "192.168.33.10"
+        #   assigning private IP
+        
+        #config.hostsupdater.aliases = ["development.web"]
+        # creating a link called development.web so we can access web page with this link instread of an IP   
             
-                web.vm.hostname = 'web'
-                # assigning host name to the VM
-                
-                web.vm.network :private_network, ip: "192.168.33.10"
-                #   assigning private IP
-                
-                #config.hostsupdater.aliases = ["development.web"]
-                # creating a link called development.web so we can access web page with this link instread of an IP   
-                    
-            end
-            
-            # creating second VM called db
-            config.vm.define "db" do |db|
-                
-                db.vm.box = "bento/ubuntu-18.04"
-                
-                db.vm.hostname = 'db'
-                
-                db.vm.network :private_network, ip: "192.168.33.11"
-                
-                #config.hostsupdater.aliases = ["development.db"]     
-            end
-            
-            # creating are Ansible controller
-            config.vm.define "controller" do |controller|
-                
-                controller.vm.box = "bento/ubuntu-18.04"
-                
-                controller.vm.hostname = 'controller'
-                
-                controller.vm.network :private_network, ip: "192.168.33.12"
-                
-                #config.hostsupdater.aliases = ["development.controller"] 
-                
-            end
-            
-            end
-
+      end
+      
+    # creating second VM called db
+      config.vm.define "db" do |db|
+        
+        db.vm.box = "bento/ubuntu-18.04"
+        
+        db.vm.hostname = 'db'
+        
+        db.vm.network :private_network, ip: "192.168.33.11"
+        
+        #config.hostsupdater.aliases = ["development.db"]     
+      end
+    
+     # creating are Ansible controller
+      config.vm.define "controller" do |controller|
+        
+        controller.vm.box = "bento/ubuntu-18.04"
+        
+        controller.vm.hostname = 'controller'
+        
+        controller.vm.network :private_network, ip: "192.168.33.12"
+        
+        #config.hostsupdater.aliases = ["development.controller"] 
+        
+      end
+    
+    end
+```
 > 2. Type in vagrant up and wait patiently.
 
 > 3. SSH into all three machines with a command that looks like this: `vagrant ssh controller`. Run updates and upgrades on all of them (`sudo apt-get update -y` & `sudo apt-get upgrade -y`).
 
 > 4. Run these commands in the `controller` VM:
-
-    sudo apt-get install software-properties-common
-    sudo apt-add-repository ppa:ansible/ansible
-    sudo apt-get update -y
-    sudo apt-get install ansible
-
+```bash
+sudo apt-get install software-properties-common
+sudo apt-add-repository ppa:ansible/ansible
+sudo apt-get update -y
+sudo apt-get install ansible
+```
 > 5. SSH into the two other VMs with the command `ssh vagrant@192.168.33.11` from the controller VM.
 
 > 6. Go to the directory `/etc/ansible` in the controller VM with the `cd` command.
@@ -77,12 +78,12 @@
 > 8. Edit the hosts file with this command: `sudo nano hosts`.
 
 > 9. In the hosts file, insert these lines:
-
-    [web]
-    192.168.33.10 ansible_connection=ssh ansible_ssh_user=vagrant ansible_ssh_pass=vagrant
-    [db]
-    192.168.33.11 ansible_connection=ssh ansible_ssh_user=vagrant ansible_ssh_pass=vagrant
-
+```bash
+[web]
+192.168.33.10 ansible_connection=ssh ansible_ssh_user=vagrant ansible_ssh_pass=vagrant
+[db]
+192.168.33.11 ansible_connection=ssh ansible_ssh_user=vagrant ansible_ssh_pass=vagrant
+```
 > 10. Check the connection to these other VMs with a command that looks like this: `ansible web -m ping`.
 
 > 11. You should see Ping: Pong.
@@ -101,61 +102,88 @@
 > 17. Create a new yml file with `sudo nano nginx.yml`.
 
 > 18. Populate the file as so. Be careful of formatting (indent your lines properly):
-
+```ansible
+---
         # where do we want to install
-        - hosts: web
+- hosts: web
 
         # get the facts
-        gather_facts: yes
+  gather_facts: yes
 
         # changes access to root user
-        become: true
+  become: true
 
-        tasks:
+  tasks:
 
         # Purge Nginx
-        - name: Purge Nginx
-            shell: |
-              sudo apt-get purge nginx nginx-common -y
+  - name: Purge Nginx
+    shell: |
+      sudo apt-get purge nginx nginx-common -y
 
         # Install Nginx
-        - name: Install nginx
-            apt: pkg=nginx state=present
+  - name: Install nginx
+    apt: pkg=nginx state=present
 
         # Set up reverse proxy
-        - name: Set up reverse proxy
-            shell: |
-              sed '49,51d' /etc/nginx/sites-available/default -i
-              awk 'NR==49{print "             proxy_pass http://localhost:3000;"}7' /etc/nginx/sites-available/default > change && mv change /etc/nginx/sites-available/default
-              awk 'NR==50{print "             proxy_http_version 1.1;"}7' /etc/nginx/sites-available/default > change && mv change /etc/nginx/sites-available/default
-              awk 'NR==51{print "             proxy_set_header Upgrade $http_upgrade;"}7' /etc/nginx/sites-available/default > change && mv change /etc/nginx/sites-available/default
-              awk 'NR==52{print "             proxy_set_header Connection 'upgrade';"}7' /etc/nginx/sites-available/default > change && mv change /etc/nginx/sites-available/default
-              awk 'NR==53{print "             proxy_set_header Host $host;"}7' /etc/nginx/sites-available/default > change && mv change /etc/nginx/sites-available/default
-              awk 'NR==54{print "             proxy_cache_bypass $http_upgrade;"}7' /etc/nginx/sites-available/default > change && mv change /etc/nginx/sites-available/default
 
-        # Restarts Nginx as the default file has been changed
+  - name: Remove Nginx default file
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
 
-        - name: Restart Nginx
-            shell: |
-              sudo systemctl restart nginx
+  - name: Create file reverse_proxy.config with read and write permissions for everyone
+    file:
+      path: /etc/nginx/sites-enabled/reverse_proxy.conf
+      state: touch
+      mode: '666'
+
+  - name: Inject lines into reverse_proxy.config
+    blockinfile:
+      path: /etc/nginx/sites-enabled/reverse_proxy.conf
+      block: |
+        server{
+          listen 80;
+          server_name development.local;
+          location / {
+              proxy_pass http://localhost:3000;
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection 'upgrade';
+              proxy_set_header Host $host;
+              proxy_cache_bypass $http_upgrade;
+          }
+        }
+
+        # Links the new configuration file to NGINX’s sites-enabled using a command.
+
+  - name: link reverse_proxy.config
+    file:
+      src: /etc/nginx/sites-enabled/reverse_proxy.conf
+      dest: /etc/nginx/sites-available/reverse_proxy.conf
+      state: link
+
+  - name: Restart Nginx
+    shell: |
+      sudo systemctl restart nginx
 
         # Gets all the dependencies
 
-        - name: Get dependencies
-            shell: |
-              apt install software-properties-common -y
-              curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-              cd app
-              apt-get install -y nodejs
-              npm install
+  - name: Get dependencies
+    shell: |
+      apt install software-properties-common -y
+      curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+      cd app
+      apt-get install -y nodejs
+      npm install
 
         # Runs the app
 
-        - name: run app
-            shell: |
-              cd app/
-              npm install
-              npm start
+  - name: run app
+    shell: |
+      cd app/
+      npm install
+      npm start
+```
 
 > 19. Run the yml file with the command `ansible-playbook nginx.yml`.
 
