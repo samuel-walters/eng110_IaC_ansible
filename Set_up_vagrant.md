@@ -168,20 +168,38 @@ sudo apt-get install ansible
 
         # Gets all the dependencies
 
-  - name: Get dependencies
+  - name: Install software-properties-common
+    apt: pkg=software-properties-common state=present
+
+  - name: Add nodejs apt key
+    apt_key:
+      url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+      state: present
+
+  - name: Install nodejs
+    apt_repository:
+      repo: deb https://deb.nodesource.com/node_13.x bionic main
+      update_cache: yes
+
+  - name: Install nodejs
+    apt:
+      update_cache: yes
+      name: nodejs
+      state: present
+
+  - name: Install npm
     shell: |
-      apt install software-properties-common -y
-      curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-      cd app
-      apt-get install -y nodejs
+      cd app/
       npm install
 
-        # Runs the app
+  - name: Install pm2
+    npm:
+      name: pm2
+      global: yes
 
   - name: run app
     shell: |
       cd app/
-      npm install
       npm start
 ```
 
