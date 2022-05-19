@@ -18,6 +18,7 @@ sudo apt-get install ansible -y
 
 > 2. Run these commands on Controller VM:
 ```bash
+cd /etc/ansible
 mkdir group_vars
 cd group_vars
 mkdir all
