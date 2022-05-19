@@ -71,12 +71,12 @@ ec2-instance ansible_host=ec2-54-216-49-215.eu-west-1.compute.amazonaws.com ansi
   vars:
     key_name: eng119
     region: eu-west-1
-    image:  ami-01c0552849d892535
-    id: "eng110_sam_app_from_ansible2"
-    sec_group: "sg-0e9e2d55bfe179cb4"
+    image: ami-01c0552849d892535
+    id: "eng110_sam_app_from_ansible3"
+    security_group_id: "sg-0e9e2d55bfe179cb4"
     subnet_id: "subnet-0429d69d55dfad9d2"
-
     ansible_python_interpreter: /usr/bin/python3
+
   tasks:
 
     - name: Facts
@@ -108,14 +108,14 @@ ec2-instance ansible_host=ec2-54-216-49-215.eu-west-1.compute.amazonaws.com ansi
           key_name: "{{ key_name }}"
           id: "{{ id }}"
           vpc_subnet_id: "{{ subnet_id }}"
-          group_id: "{{ sec_group }}"
+          group_id: "{{ security_group_id }}"
           image: "{{ image }}"
           instance_type: t2.micro
           region: "{{ region }}"
           wait: true
           count: 1
           instance_tags:
-            Name: eng110_sam_node_app_from_ansible2
+            Name: eng110_sam_node_app_from_ansible3
 
       tags: ['never', 'create_ec2']
 ```
@@ -223,6 +223,6 @@ ec2-instance ansible_host=ec2-54-216-49-215.eu-west-1.compute.amazonaws.com ansi
       npm start
 ```
 
-> 17. Run the command `sudo ansible-playbook set_up_app.yml --ask-vault-pass`.
+> 17. Run the command `sudo ansible-playbook playbook.yml --ask-vault-pass --tags create_ec2`.
 
 > 18. Go to the EC2's public IP.
