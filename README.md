@@ -87,32 +87,3 @@ provisioning.sh script can do multiple things in **one** server only. yaml scrip
 Example: 500 servers running. Update command for hundred servers. Would have to run the script for every server individually. Ansible: could you go and run this script for all these servers? No issues: it could do it.
 
 Sonar Cube - looks for any potential threats (IPs) - and puts them into the CSV/JSON file - this file is used in the security groups of these servers to block these IPs. How do we block these IPs in 1000s of servers (yes, through security groups - it would take a very long time). --> But it's one single command with ansible - pick up the file (in a playbook - script) - these are the hosts - go and block them. Specify the servers - the family of OS - e.g. check Ubuntu servers first. 
-
-
-# Task
-
-- Create 2 VMs with Vagrant
-- Create Ansible controller with two agent nodes - app & DB.
-- Set up Ansible Controller with required dependencies
-- Test ansible --version
-- python --version 2.7 -- ideally 3 or above
-- What is YAML/YML file.yml file.yaml both work
-- Adhoc commands with Ansible
-- Testing connection between Controller and agent nodes
-- ssh - vagrant - between VMs. --- Controller and agent nodes
-- Ansible Folder/file structure
-- Ansible Hosts/inventory
-- Ansible playbooks - advanced form of provision.sh script ---> playbook.yml
-- Why learn YML - Used with Ansible - cloud Formation AWS - Docker compose
-- Kubernetes -  
-
-
-
-Ansible host file - what are the hosts and how do we connect to them - we will create hosts called web and db and connect to them given whatever ip address--> /etc/ansible/hosts
-
-vagrant - use ubuntu 18.04
-
-comment out config.hostsupdate.aliases 
-
-
-
