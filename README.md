@@ -62,19 +62,7 @@ There are three major cases where IaC approach can be applied: software developm
 
 * Finally, cloud monitoring, logging and alerting tools also need to run in some environments and deliver new system components. Solutions like ELK stack, FluentD, SumoLogic, Datadog, Prometheus + Grafana — all of these can be quickly provisioned and configured for your project using IaC best practices.
 
-# General Explanation
-
-Codify whatever we need. Write set of instructions in a form of a script - yaml, python - to update an app, deploy architecture - to avoid the human intervention as much as possible. Don't need all the clicks (security group etc.). 
-
-Orchestration: Create a VPC, create subnets, security groups, Internet Gateway, SNS, cloud watch alarm, --> lots and lots of clicks. Write a set of instructions in a terraform script to automatically do everything listed above.
-
-^ No deployment, though. We need another tool to push the app into the existing architecture. Ansible can configure and provision into the existing architecture - go into this vpc, this ec2 instance, and install node. Then go into the other ec2 instance, and set up Mongodb ---> change this security group, change this environment variable.
-
-With both orchestration and management, you can automate the whole process of setting up architecture and managing it so it can host applications (or whatever it is you are doing).
-
-Mutable - you can change the configuration --> immutable - you **cannot** change the configuration.
-
-## Ansible
+# Ansible
 
 Ansible can actually do both orchestration and management - but we also learn Terraform because some companies use it.
 
@@ -82,8 +70,10 @@ Ansible can actually do both orchestration and management - but we also learn Te
 
 * Agentless - because everything you need to install only needs to be installed on Ansible. The other server does not need to have Ansible installed. 
 
-provisioning.sh script can do multiple things in **one** server only. yaml script can have numerous instructions for multiple servers.
+A provisioning.sh script can do multiple things in **one** server only. But with Ansible, the yaml scripts can have numerous instructions for multiple servers.
 
-Example: 500 servers running. Update command for hundred servers. Would have to run the script for every server individually. Ansible: could you go and run this script for all these servers? No issues: it could do it.
+## Use case
 
-Sonar Cube - looks for any potential threats (IPs) - and puts them into the CSV/JSON file - this file is used in the security groups of these servers to block these IPs. How do we block these IPs in 1000s of servers (yes, through security groups - it would take a very long time). --> But it's one single command with ansible - pick up the file (in a playbook - script) - these are the hosts - go and block them. Specify the servers - the family of OS - e.g. check Ubuntu servers first. 
+There are 500 servers running, and you need to run an update command for half of those servers. In this scenario, if you were not using IaC, you would have to run the script for every server individually. But by using ansible, you could run such a command on all these servers without manually going into every instance and running sudo apt-get update.
+
+Sonar Cube: a tool that looks for any potential threats (IPs), and places these IPS into a CSV or JSON file. This file is then used in the security groups of these servers to block these IPs. But how do we block these IPs in 1000s of servers (yes, through security groups - but it would take a very long time to manually carry out this task). But with ansible, it's one single command. You pick up the file (in a playbook), and run a script to block the hosts.
